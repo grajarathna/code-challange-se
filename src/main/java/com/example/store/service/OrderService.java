@@ -10,6 +10,7 @@ import com.example.store.repository.CustomerRepository;
 import com.example.store.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -26,16 +28,25 @@ public class OrderService {
     private final OrderMapper orderMapper;
 
     public List<OrderResponse> getAllOrders() {
-        return orderMapper.ordersToOrderResponseList(orderRepository.findAll());
+        log.info("Fetching all orders");
+        List<OrderResponse> orders = orderMapper.ordersToOrderResponseList(orderRepository.findAll());
+        log.info("Retrieved {} orders", orders.size());
+        return orders;
     }
 
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request) {
+        log.info("Creating order for customer id: {}", request.getCustomerId());
         Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Customer", request.getCustomerId()));
+                .orElseThrow(() -> {
+                    log.warn("Customer not found with id: {}", request.getCustomerId());
+                    return new ResourceNotFoundException("Customer", request.getCustomerId());
+                });
 
         Order order = orderMapper.createOrderRequestToOrder(request);
         order.setCustomer(customer);
-        return orderMapper.orderToOrderResponse(orderRepository.save(order));
+        OrderResponse response = orderMapper.orderToOrderResponse(orderRepository.save(order));
+        log.info("Order created with id: {} for customer: {}", response.getId(), customer.getName());
+        return response;
     }
 }
