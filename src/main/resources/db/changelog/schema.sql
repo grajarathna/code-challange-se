@@ -4,8 +4,8 @@ CREATE TABLE customer (
                           name VARCHAR(255) NOT NULL
 );
 
--- Create order table
-CREATE TABLE "order" (
+-- Create purchase_order table
+CREATE TABLE purchase_order (
                          id BIGSERIAL PRIMARY KEY,
                          description VARCHAR(255) NOT NULL,
                          customer_id BIGINT NOT NULL,
