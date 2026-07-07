@@ -2,10 +2,12 @@ package com.example.store.entity;
 
 import jakarta.persistence.*;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "purchase_order")
 public class Order {
     @Id

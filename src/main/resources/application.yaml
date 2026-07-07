@@ -4,6 +4,7 @@ spring:
     username: admin
     password: admin
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: validate
     properties:
@@ -13,3 +14,6 @@ spring:
         default_batch_fetch_size: 10
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+  jackson:
+    serialization:
+      indent-output: true

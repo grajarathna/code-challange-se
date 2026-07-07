@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: store
+  title: Store
   version: '1.0'
   description: A simple store
   contact:
@@ -15,11 +15,11 @@ servers:
   - url: 'http://localhost:8080'
     description: dev
 paths:
-  /order:
+  /api/v1/order:
     get:
       summary: Get Orders
       tags:
-        - store
+        - Order
       responses:
         '200':
           description: OK
@@ -34,28 +34,26 @@ paths:
     post:
       summary: Create Order
       tags:
-        - store
+        - Order
       responses:
         '201':
           description: Created
+        '400':
+          description: Invalid input — validation failed
+        '404':
+          description: Customer not found
       operationId: createOrder
       description: Create a new order
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                id:
-                  type: integer
-                  format: int64
-                descriptioon:
-                  type: string
-  /customer:
+              $ref: '#/components/schemas/CreateOrderRequest'
+  /api/v1/customer:
     get:
       summary: Get Customers
       tags:
-        - store
+        - Customer
       responses:
         '200':
           description: OK
@@ -70,28 +68,24 @@ paths:
     post:
       summary: Create Customer
       tags:
-        - store
+        - Customer
       responses:
         '201':
           description: Created
+        '400':
+          description: Invalid input — validation failed
       operationId: createCustomer
       description: Create a new customer
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                id:
-                  type: integer
-                  format: int64
-                name:
-                  type: string
+              $ref: '#/components/schemas/CreateCustomerRequest'
   /products:
     get:
       summary: Get Products
       tags:
-        - store
+        - Product
       responses:
         '200':
           description: OK
@@ -114,7 +108,7 @@ paths:
     post:
       summary: Create Product
       tags:
-        - store
+        - Product
       responses:
         '201':
           description: Created
@@ -131,8 +125,6 @@ paths:
                   format: int64
                 description:
                   type: string
-                  x-stoplight:
-                    id: jbh0jzkonppv8
 components:
   schemas:
     Order:
@@ -150,7 +142,7 @@ components:
             id:
               type: integer
               format: int64
-            description:
+            name:
               type: string
     Customer:
       title: Customer
@@ -171,8 +163,30 @@ components:
                 format: int64
               description:
                 type: string
-                x-stoplight:
-                  id: mq08x82g95zl9
+    CreateOrderRequest:
+      title: CreateOrderRequest
+      type: object
+      required:
+        - description
+        - customerId
+      properties:
+        description:
+          type: string
+        customerId:
+          type: integer
+          format: int64
+    CreateCustomerRequest:
+      title: CreateCustomerRequest
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
 tags:
-  - name: store
-    description: store operations
+  - name: Customer
+    description: Customer management operations
+  - name: Order
+    description: Order management operations
+  - name: Product
+    description: Product operations

@@ -1,33 +1,31 @@
 package com.example.store.controller;
 
-import com.example.store.dto.OrderDTO;
-import com.example.store.entity.Order;
-import com.example.store.mapper.OrderMapper;
-import com.example.store.repository.OrderRepository;
-
+import com.example.store.dto.CreateOrderRequest;
+import com.example.store.dto.OrderResponse;
+import com.example.store.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/api/v1/order")
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final OrderRepository orderRepository;
-    private final OrderMapper orderMapper;
+    private final OrderService orderService;
 
     @GetMapping
-    public List<OrderDTO> getAllOrders() {
-        return orderMapper.ordersToOrderDTOs(orderRepository.findAll());
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderDTO createOrder(@RequestBody Order order) {
-        return orderMapper.orderToOrderDTO(orderRepository.save(order));
+    public OrderResponse createOrder(@Valid @RequestBody CreateOrderRequest request) {
+        return orderService.createOrder(request);
     }
 }
