@@ -13,6 +13,5 @@ public class CreateOrderRequest {
     @Size(max = 255, message = "Order description must not exceed 255 characters")
     private String description;
 
-    @NotNull(message = "Customer ID is required")
-    private Long customerId;
+    @NotNull(message = "Customer ID is required") private Long customerId;
 }

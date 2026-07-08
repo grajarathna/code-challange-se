@@ -20,9 +20,8 @@ public class RequestIdFilter extends OncePerRequestFilter {
     private static final String MDC_KEY = "requestId";
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain chain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
         String requestId = Optional.ofNullable(request.getHeader(REQUEST_ID_HEADER))
                 .orElse(UUID.randomUUID().toString());
 

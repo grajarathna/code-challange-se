@@ -29,8 +29,10 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleValidationErrors(MethodArgumentNotValidException ex) {
         List<Map<String, String>> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> Map.of(
-                        "field", error.getField(),
-                        "message", error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value"))
+                        "field",
+                        error.getField(),
+                        "message",
+                        error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value"))
                 .toList();
 
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
@@ -53,8 +55,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGenericException(Exception ex) {
         log.error("Unexpected error: ", ex);
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        ProblemDetail problem =
+                ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
         problem.setTitle("Internal Server Error");
         problem.setProperty("timestamp", Instant.now());
         return problem;
