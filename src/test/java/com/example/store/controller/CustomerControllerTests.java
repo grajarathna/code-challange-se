@@ -51,7 +51,7 @@ class CustomerControllerTests {
         secondCustomer.setId(2L);
         secondCustomer.setName("Jane Smith");
 
-        when(customerService.getAllCustomers()).thenReturn(List.of(customerResponse, secondCustomer));
+        when(customerService.getAllCustomers(null)).thenReturn(List.of(customerResponse, secondCustomer));
 
         mockMvc.perform(get("/api/v1/customer"))
                 .andExpect(status().isOk())
@@ -82,5 +82,31 @@ class CustomerControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testSearchCustomersByName() throws Exception {
+        when(customerService.getAllCustomers("john")).thenReturn(List.of(customerResponse));
+
+        mockMvc.perform(get("/api/v1/customer").param("name", "john"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").value("John Doe"));
+    }
+
+    @Test
+    void testSearchCustomersByName_NoResults() throws Exception {
+        when(customerService.getAllCustomers("zzz")).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/customer").param("name", "zzz"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void testSearchCustomersByName_BlankParam_ReturnsAll() throws Exception {
+        when(customerService.getAllCustomers("")).thenReturn(List.of(customerResponse));
+
+        mockMvc.perform(get("/api/v1/customer").param("name", "")).andExpect(status().isOk());
     }
 }
