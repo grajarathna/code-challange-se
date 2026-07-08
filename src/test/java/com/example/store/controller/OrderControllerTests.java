@@ -3,10 +3,10 @@ package com.example.store.controller;
 import com.example.store.dto.CreateOrderRequest;
 import com.example.store.dto.OrderCustomerDTO;
 import com.example.store.dto.OrderResponse;
+import com.example.store.dto.PaginatedOrderResponse;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +15,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
 class OrderControllerTests {
@@ -53,15 +56,76 @@ class OrderControllerTests {
         createRequest.setCustomerId(1L);
     }
 
+    // @Test
+    // void testGetAllOrders() throws Exception {
+    //     when(orderService.getAllOrders()).thenReturn(List.of(orderResponse));
+    //
+    //     mockMvc.perform(get("/api/v1/order"))
+    //             .andExpect(status().isOk())
+    //             .andExpect(jsonPath("$[0].id").value(1))
+    //             .andExpect(jsonPath("$[0].description").value("Test Order"))
+    //             .andExpect(jsonPath("$[0].customer.name").value("John Doe"));
+    // }
+
     @Test
-    void testGetAllOrders() throws Exception {
-        when(orderService.getAllOrders()).thenReturn(List.of(orderResponse));
+    void testGetAllOrders_DefaultPagination() throws Exception {
+        PaginatedOrderResponse paginatedResponse = buildPaginatedResponse(
+                List.of(orderResponse), 0, 20, 1, 1);
+        when(orderService.getAllOrders(0, 20)).thenReturn(paginatedResponse);
 
         mockMvc.perform(get("/api/v1/order"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].description").value("Test Order"))
-                .andExpect(jsonPath("$[0].customer.name").value("John Doe"));
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.content[0].description").value("Test Order"))
+                .andExpect(jsonPath("$.content[0].customer.name").value("John Doe"))
+                .andExpect(jsonPath("$.pagination.totalElements").value(1))
+                .andExpect(jsonPath("$.pagination.totalPages").value(1))
+                .andExpect(jsonPath("$.pagination.currentPage").value(0))
+                .andExpect(jsonPath("$.pagination.pageSize").value(20));
+    }
+
+    @Test
+    void testGetAllOrders_WithExplicitPageAndSize() throws Exception {
+        PaginatedOrderResponse paginatedResponse = buildPaginatedResponse(
+                List.of(orderResponse), 2, 10, 50, 5);
+        when(orderService.getAllOrders(2, 10)).thenReturn(paginatedResponse);
+
+        mockMvc.perform(get("/api/v1/order")
+                        .param("page", "2")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.pagination.currentPage").value(2))
+                .andExpect(jsonPath("$.pagination.pageSize").value(10))
+                .andExpect(jsonPath("$.pagination.totalElements").value(50))
+                .andExpect(jsonPath("$.pagination.totalPages").value(5));
+    }
+
+    @Test
+    void testGetAllOrders_EmptyPage() throws Exception {
+        PaginatedOrderResponse paginatedResponse = buildPaginatedResponse(
+                Collections.emptyList(), 5, 20, 50, 3);
+        when(orderService.getAllOrders(5, 20)).thenReturn(paginatedResponse);
+
+        mockMvc.perform(get("/api/v1/order")
+                        .param("page", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.pagination.currentPage").value(5))
+                .andExpect(jsonPath("$.pagination.totalElements").value(50));
+    }
+
+    private PaginatedOrderResponse buildPaginatedResponse(
+            List<OrderResponse> content, int page, int size, long totalElements, int totalPages) {
+        PaginatedOrderResponse response = new PaginatedOrderResponse();
+        response.setContent(content);
+        PaginatedOrderResponse.PaginationMetadata metadata = new PaginatedOrderResponse.PaginationMetadata();
+        metadata.setTotalElements(totalElements);
+        metadata.setTotalPages(totalPages);
+        metadata.setCurrentPage(page);
+        metadata.setPageSize(size);
+        response.setPagination(metadata);
+        return response;
     }
 
     @Test

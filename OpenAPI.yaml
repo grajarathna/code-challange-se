@@ -17,20 +17,36 @@ servers:
 paths:
   /api/v1/order:
     get:
-      summary: Get Orders
+      summary: Get Orders (Paginated)
       tags:
         - Order
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+          description: Zero-based page number (negative values default to 0)
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          description: Page size (capped at 100, values ≤ 0 default to 20)
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/PaginatedOrderResponse'
       operationId: getOrders
-      description: Get all orders
+      description: Get orders with pagination. Returns a bounded page of orders with their associated customer and products data.
     post:
       summary: Create Order
       tags:
@@ -256,6 +272,33 @@ components:
       properties:
         description:
           type: string
+    PaginatedOrderResponse:
+      title: PaginatedOrderResponse
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        pagination:
+          $ref: '#/components/schemas/PaginationMetadata'
+    PaginationMetadata:
+      title: PaginationMetadata
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+          description: Total number of orders across all pages
+        totalPages:
+          type: integer
+          description: Total number of pages
+        currentPage:
+          type: integer
+          description: Current zero-based page number
+        pageSize:
+          type: integer
+          description: Effective page size (capped at 100)
 tags:
   - name: Customer
     description: Customer management operations
