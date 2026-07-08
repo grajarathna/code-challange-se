@@ -49,11 +49,41 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateOrderRequest'
+  /api/v1/order/{id}:
+    get:
+      summary: Get Order by ID
+      tags:
+        - Order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Order not found
+      operationId: getOrderById
+      description: Get a specific order by its ID
   /api/v1/customer:
     get:
       summary: Get Customers
       tags:
         - Customer
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter customers by name substring (case-insensitive)
       responses:
         '200':
           description: OK
@@ -64,7 +94,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Customer'
       operationId: getCustomers
-      description: Get all customers
+      description: Get all customers, optionally filtered by name
     post:
       summary: Create Customer
       tags:
