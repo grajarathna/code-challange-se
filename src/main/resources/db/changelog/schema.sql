@@ -11,3 +11,16 @@ CREATE TABLE purchase_order (
                          customer_id BIGINT NOT NULL,
                          CONSTRAINT fk_customer FOREIGN KEY (customer_id) REFERENCES customer (id)
 );
+
+-- Create product table
+CREATE TABLE product (
+    id BIGSERIAL PRIMARY KEY,
+    description VARCHAR(255) NOT NULL
+);
+
+-- order product many to many join table
+CREATE TABLE order_product (
+    order_id BIGINT NOT NULL REFERENCES purchase_order(id),
+    product_id BIGINT NOT NULL REFERENCES product(id),
+    PRIMARY KEY (order_id, product_id)
+);

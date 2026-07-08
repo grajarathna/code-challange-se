@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4-fix-sequences
+      author: developer@securitease.com
+      changes:
+        - sql:
+            sql: |
+              SELECT setval('customer_id_seq', (SELECT MAX(id) FROM customer));
+              SELECT setval('purchase_order_id_seq', (SELECT MAX(id) FROM purchase_order));
+              SELECT setval('product_id_seq', (SELECT MAX(id) FROM product));

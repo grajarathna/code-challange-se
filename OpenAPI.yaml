@@ -111,7 +111,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateCustomerRequest'
-  /products:
+  /api/v1/product:
     get:
       summary: Get Products
       tags:
@@ -122,19 +122,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  description:
-                    type: string
-                  orders:
-                    type: array
-                    items:
-                      type: integer
-                      format: int64
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
       operationId: getProducts
-      description: Get all products
+      description: Get all products with associated order IDs
     post:
       summary: Create Product
       tags:
@@ -142,19 +134,38 @@ paths:
       responses:
         '201':
           description: Created
+        '400':
+          description: Invalid input — validation failed
       operationId: createProduct
       description: Create a new product
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                id:
-                  type: integer
-                  format: int64
-                description:
-                  type: string
+              $ref: '#/components/schemas/CreateProductRequest'
+  /api/v1/product/{id}:
+    get:
+      summary: Get Product by ID
+      tags:
+        - Product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+      operationId: getProductById
+      description: Get a specific product by its ID with associated order IDs
 components:
   schemas:
     Order:
@@ -174,6 +185,16 @@ components:
               format: int64
             name:
               type: string
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                format: int64
+              description:
+                type: string
     Customer:
       title: Customer
       type: object
@@ -212,6 +233,28 @@ components:
         - name
       properties:
         name:
+          type: string
+    Product:
+      title: Product
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        description:
+          type: string
+        orderIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+    CreateProductRequest:
+      title: CreateProductRequest
+      type: object
+      required:
+        - description
+      properties:
+        description:
           type: string
 tags:
   - name: Customer

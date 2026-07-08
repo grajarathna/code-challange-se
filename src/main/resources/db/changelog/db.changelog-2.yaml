@@ -4,4 +4,4 @@ databaseChangeLog:
       author: developer@securitease.com
       changes:
         - sqlFile:
-            path: db/changelog/data.sql
+            path: db/changelog/customer-and-order-data.sql
