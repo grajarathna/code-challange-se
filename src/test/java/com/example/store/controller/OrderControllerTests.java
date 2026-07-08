@@ -7,6 +7,7 @@ import com.example.store.dto.PaginatedOrderResponse;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,8 +70,7 @@ class OrderControllerTests {
 
     @Test
     void testGetAllOrders_DefaultPagination() throws Exception {
-        PaginatedOrderResponse paginatedResponse = buildPaginatedResponse(
-                List.of(orderResponse), 0, 20, 1, 1);
+        PaginatedOrderResponse paginatedResponse = buildPaginatedResponse(List.of(orderResponse), 0, 20, 1, 1);
         when(orderService.getAllOrders(0, 20)).thenReturn(paginatedResponse);
 
         mockMvc.perform(get("/api/v1/order"))
@@ -86,13 +86,10 @@ class OrderControllerTests {
 
     @Test
     void testGetAllOrders_WithExplicitPageAndSize() throws Exception {
-        PaginatedOrderResponse paginatedResponse = buildPaginatedResponse(
-                List.of(orderResponse), 2, 10, 50, 5);
+        PaginatedOrderResponse paginatedResponse = buildPaginatedResponse(List.of(orderResponse), 2, 10, 50, 5);
         when(orderService.getAllOrders(2, 10)).thenReturn(paginatedResponse);
 
-        mockMvc.perform(get("/api/v1/order")
-                        .param("page", "2")
-                        .param("size", "10"))
+        mockMvc.perform(get("/api/v1/order").param("page", "2").param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(1))
                 .andExpect(jsonPath("$.pagination.currentPage").value(2))
@@ -103,12 +100,10 @@ class OrderControllerTests {
 
     @Test
     void testGetAllOrders_EmptyPage() throws Exception {
-        PaginatedOrderResponse paginatedResponse = buildPaginatedResponse(
-                Collections.emptyList(), 5, 20, 50, 3);
+        PaginatedOrderResponse paginatedResponse = buildPaginatedResponse(Collections.emptyList(), 5, 20, 50, 3);
         when(orderService.getAllOrders(5, 20)).thenReturn(paginatedResponse);
 
-        mockMvc.perform(get("/api/v1/order")
-                        .param("page", "5"))
+        mockMvc.perform(get("/api/v1/order").param("page", "5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isEmpty())
                 .andExpect(jsonPath("$.pagination.currentPage").value(5))

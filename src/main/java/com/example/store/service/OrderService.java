@@ -46,15 +46,15 @@ public class OrderService {
     }
 
     /**
-     * Retrieves a paginated list of orders with their associated customer and products data.
-     * Uses a two-query ID-based strategy to minimize database round trips.
+     * Retrieves a paginated list of orders with their associated customer and products data. Uses a two-query ID-based
+     * strategy to minimize database round trips.
      *
      * @param page the zero-based page number
      * @param size the requested page size (capped at 100)
      * @return paginated response containing orders and pagination metadata
      */
     public PaginatedOrderResponse getAllOrders(int page, int size) {
-        //input sanitization if inputs are negative
+        // input sanitization if inputs are negative
         int validPage = Math.max(page, 0);
         int validSize = size <= 0 ? 20 : Math.min(size, 100);
         log.info("Fetching paginated orders: page={}, size={} (effective={})", page, size, validSize);
@@ -79,7 +79,8 @@ public class OrderService {
         return buildPaginatedResponse(content, validPage, validSize, idPage.getTotalElements(), idPage.getTotalPages());
     }
 
-    private PaginatedOrderResponse buildEmptyPaginatedResponse(int page, int pageSize, long totalElements, int totalPages) {
+    private PaginatedOrderResponse buildEmptyPaginatedResponse(
+            int page, int pageSize, long totalElements, int totalPages) {
         PaginatedOrderResponse response = new PaginatedOrderResponse();
         response.setContent(Collections.emptyList());
 
@@ -93,7 +94,8 @@ public class OrderService {
         return response;
     }
 
-    private PaginatedOrderResponse buildPaginatedResponse(List<OrderResponse> content, int page, int pageSize, long totalElements, int totalPages) {
+    private PaginatedOrderResponse buildPaginatedResponse(
+            List<OrderResponse> content, int page, int pageSize, long totalElements, int totalPages) {
         PaginatedOrderResponse response = new PaginatedOrderResponse();
         response.setContent(content);
 

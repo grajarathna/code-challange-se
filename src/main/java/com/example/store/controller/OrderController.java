@@ -22,8 +22,7 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<PaginatedOrderResponse> getAllOrders(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(orderService.getAllOrders(page, size));
     }
 
