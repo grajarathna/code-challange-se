@@ -25,7 +25,7 @@ public class CustomerService {
 
     public List<CustomerResponse> getAllCustomers() {
         log.info("Fetching all customers");
-        List<CustomerResponse> customers = customerMapper.customersToCustomerResponseList(customerRepository.findAll());
+        List<CustomerResponse> customers = customerMapper.customersToCustomerResponseList(customerRepository.findAllWithOrders());
         log.info("Retrieved {} customers", customers.size());
         return customers;
     }

@@ -29,7 +29,7 @@ public class OrderService {
 
     public List<OrderResponse> getAllOrders() {
         log.info("Fetching all orders");
-        List<OrderResponse> orders = orderMapper.ordersToOrderResponseList(orderRepository.findAll());
+        List<OrderResponse> orders = orderMapper.ordersToOrderResponseList(orderRepository.findAllWithCustomer());
         log.info("Retrieved {} orders", orders.size());
         return orders;
     }
