@@ -97,4 +97,22 @@ class OrderControllerTests {
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void testGetOrderById() throws Exception {
+        when(orderService.getOrderById(1L)).thenReturn(orderResponse);
+
+        mockMvc.perform(get("/api/v1/order/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.description").value("Test Order"))
+                .andExpect(jsonPath("$.customer.name").value("John Doe"));
+    }
+
+    @Test
+    void testGetOrderById_NotFound() throws Exception {
+        when(orderService.getOrderById(999L)).thenThrow(new ResourceNotFoundException("Order", 999L));
+
+        mockMvc.perform(get("/api/v1/order/999")).andExpect(status().isNotFound());
+    }
 }
