@@ -57,7 +57,7 @@ paths:
         '400':
           description: Invalid input — validation failed
         '404':
-          description: Customer not found
+          description: Customer or product not found
       operationId: createOrder
       description: Create a new order
       requestBody:
@@ -236,12 +236,20 @@ components:
       required:
         - description
         - customerId
+        - productIds
       properties:
         description:
           type: string
         customerId:
           type: integer
           format: int64
+        productIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          minItems: 1
+          description: List of product IDs to include in the order
     CreateCustomerRequest:
       title: CreateCustomerRequest
       type: object

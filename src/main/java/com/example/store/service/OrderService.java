@@ -5,14 +5,19 @@ import com.example.store.dto.OrderResponse;
 import com.example.store.dto.PaginatedOrderResponse;
 import com.example.store.entity.Customer;
 import com.example.store.entity.Order;
+import com.example.store.entity.Product;
 import com.example.store.exception.ResourceNotFoundException;
 import com.example.store.mapper.OrderMapper;
 import com.example.store.repository.CustomerRepository;
 import com.example.store.repository.OrderRepository;
+import com.example.store.repository.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -30,7 +35,9 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
+    private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
+    private final CacheManager cacheManager;
 
     /**
      * Retrieves all orders with their associated customer data.
@@ -110,13 +117,14 @@ public class OrderService {
     }
 
     /**
-     * Creates a new order for an existing customer.
+     * Creates a new order for an existing customer with specified products.
      *
-     * @param request the order creation request containing description and customer ID
-     * @return the created order with generated ID and associated customer
+     * @param request the order creation request containing description, customer ID, and product IDs
+     * @return the created order with generated ID, associated customer, and products
      * @throws ResourceNotFoundException if the specified customer does not exist
      */
     @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public OrderResponse createOrder(CreateOrderRequest request) {
         log.info("Creating order for customer id: {}", request.getCustomerId());
         Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(() -> {
@@ -124,9 +132,21 @@ public class OrderService {
             return new ResourceNotFoundException("Customer", request.getCustomerId());
         });
 
+        List<Product> products = productRepository.findAllById(request.getProductIds());
+        if (products.size() != request.getProductIds().size()) {
+            log.warn("Some product IDs not found in request: {}", request.getProductIds());
+            throw new ResourceNotFoundException("Product", -1L);
+        }
+
         Order order = orderMapper.createOrderRequestToOrder(request);
         order.setCustomer(customer);
+        order.setProducts(products);
         OrderResponse response = orderMapper.orderToOrderResponse(orderRepository.save(order));
+
+        // Targeted eviction: only evict productById entries for products in this order
+        request.getProductIds().forEach(productId ->
+                cacheManager.getCache("productById").evict(productId));
+
         log.info("Order created with id: {} for customer: {}", response.getId(), customer.getName());
         return response;
     }
@@ -138,6 +158,7 @@ public class OrderService {
      * @return the order details
      * @throws ResourceNotFoundException if the order does not exist
      */
+    @Cacheable(cacheNames = "orderById", key = "#orderId")
     public OrderResponse getOrderById(Long orderId) {
         log.info("Fetching order with id: {}", orderId);
         return orderMapper.orderToOrderResponse(

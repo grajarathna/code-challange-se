@@ -55,6 +55,7 @@ class OrderControllerTests {
         createRequest = new CreateOrderRequest();
         createRequest.setDescription("Test Order");
         createRequest.setCustomerId(1L);
+        createRequest.setProductIds(List.of(1L));
     }
 
     // @Test

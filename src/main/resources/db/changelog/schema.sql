@@ -24,3 +24,12 @@ CREATE TABLE order_product (
     product_id BIGINT NOT NULL REFERENCES product(id),
     PRIMARY KEY (order_id, product_id)
 );
+
+--index for trigram search
+--This combination is highly effective for accelerating fuzzy searches, wildcard matches
+--GIN indexes provide significantly faster search retrieval
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX idx_customer_name_trgm ON customer USING gin (name gin_trgm_ops);
+
+-- Index on FK column to accelerate JOIN between purchase_order and customer
+CREATE INDEX idx_purchase_order_customer_id ON purchase_order (customer_id);

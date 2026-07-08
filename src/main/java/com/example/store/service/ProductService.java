@@ -10,6 +10,8 @@ import com.example.store.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ public class ProductService {
     private final ProductMapper productMapper;
 
     /** @return all products along with the list of the order IDs which contain those products */
+    @Cacheable(cacheNames = "products")
     public List<ProductResponse> getAllProducts() {
         return productMapper.productsToProductResponseList(productRepository.findAllWithOrders());
     }
@@ -36,6 +39,9 @@ public class ProductService {
      * @return the created product with generated ID
      */
     @Transactional
+    @CacheEvict(
+            cacheNames = {"products", "productById"},
+            allEntries = true)
     public ProductResponse createProduct(CreateProductRequest request) {
         log.info("Creating product with name: {}", request.getDescription());
         Product product = productMapper.createProductRequestToProduct(request);
@@ -51,6 +57,7 @@ public class ProductService {
      * @return the product details
      * @throws ResourceNotFoundException if the order does not exist
      */
+    @Cacheable(cacheNames = "productById", key = "#productId")
     public ProductResponse getProductById(Long productId) {
         log.info("Fetching product with id: {}", productId);
         return productMapper.productToProductResponse(
