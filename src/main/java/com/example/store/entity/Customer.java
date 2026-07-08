@@ -18,6 +18,9 @@ public class Customer {
 
     private String name;
 
+    @Column(unique = true, nullable = false)
+    private String email;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
 }

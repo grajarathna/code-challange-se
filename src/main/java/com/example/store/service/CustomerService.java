@@ -36,12 +36,18 @@ public class CustomerService {
     /**
      * Creates a new customer.
      *
-     * @param request the customer creation request containing the name
+     * @param request the customer creation request containing the name and email
      * @return the created customer with generated ID
+     * @throws IllegalArgumentException if a customer with the same email already exists
      */
     @Transactional
     public CustomerResponse createCustomer(CreateCustomerRequest request) {
         log.info("Creating customer with name: {}", request.getName());
+        if (customerRepository.existsByEmail(request.getEmail())) {
+            log.warn("Customer with email already exists: {}", request.getEmail());
+            throw new IllegalArgumentException(
+                    String.format("Customer with email '%s' already exists", request.getEmail()));
+        }
         Customer customer = customerMapper.createCustomerRequestToCustomer(request);
         CustomerResponse response = customerMapper.customerToCustomerResponse(customerRepository.save(customer));
         log.info("Customer created with id: {}", response.getId());

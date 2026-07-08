@@ -120,6 +120,8 @@ paths:
           description: Created
         '400':
           description: Invalid input — validation failed
+        '409':
+          description: Customer with this email already exists
       operationId: createCustomer
       description: Create a new customer
       requestBody:
@@ -201,6 +203,9 @@ components:
               format: int64
             name:
               type: string
+            email:
+              type: string
+              format: email
         products:
           type: array
           items:
@@ -220,6 +225,9 @@ components:
           format: int64
         name:
           type: string
+        email:
+          type: string
+          format: email
         orders:
           type: array
           items:
@@ -255,9 +263,14 @@ components:
       type: object
       required:
         - name
+        - email
       properties:
         name:
           type: string
+        email:
+          type: string
+          format: email
+          description: Unique email address for the customer
     Product:
       title: Product
       type: object

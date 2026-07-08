@@ -1,7 +1,8 @@
 -- Create customer table
 CREATE TABLE customer (
                           id BIGSERIAL PRIMARY KEY,
-                          name VARCHAR(255) NOT NULL
+                          name VARCHAR(255) NOT NULL,
+                          email VARCHAR(255) NOT NULL UNIQUE
 );
 
 -- Create purchase_order table
@@ -31,5 +32,6 @@ CREATE TABLE order_product (
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE INDEX idx_customer_name_trgm ON customer USING gin (name gin_trgm_ops);
 
+-- improve /api/v1/customer/12
 -- Index on FK column to accelerate JOIN between purchase_order and customer
 CREATE INDEX idx_purchase_order_customer_id ON purchase_order (customer_id);

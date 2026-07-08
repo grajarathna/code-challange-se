@@ -148,8 +148,8 @@ public class OrderService {
         OrderResponse response = orderMapper.orderToOrderResponse(orderRepository.save(order));
 
         // Targeted eviction: only evict productById entries for products in this order
-        request.getProductIds().forEach(productId ->
-                cacheManager.getCache("productById").evict(productId));
+        request.getProductIds()
+                .forEach(productId -> cacheManager.getCache("productById").evict(productId));
 
         log.info("Order created with id: {} for customer: {}", response.getId(), customer.getName());
         return response;

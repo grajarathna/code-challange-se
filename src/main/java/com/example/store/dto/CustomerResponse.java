@@ -8,5 +8,6 @@ import java.util.List;
 public class CustomerResponse {
     private Long id;
     private String name;
+    private String email;
     private List<CustomerOrderDTO> orders;
 }

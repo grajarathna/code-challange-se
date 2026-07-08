@@ -40,9 +40,11 @@ class CustomerControllerTests {
         customerResponse = new CustomerResponse();
         customerResponse.setId(1L);
         customerResponse.setName("John Doe");
+        customerResponse.setEmail("john.doe@example.com");
 
         createRequest = new CreateCustomerRequest();
         createRequest.setName("John Doe");
+        createRequest.setEmail("john.doe@example.com");
     }
 
     @Test
@@ -82,6 +84,19 @@ class CustomerControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testCreateCustomer_DuplicateEmail_ReturnsConflict() throws Exception {
+        when(customerService.createCustomer(any(CreateCustomerRequest.class)))
+                .thenThrow(new IllegalArgumentException("Customer with email 'john.doe@example.com' already exists"));
+
+        mockMvc.perform(post("/api/v1/customer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Conflict"))
+                .andExpect(jsonPath("$.detail").value("Customer with email 'john.doe@example.com' already exists"));
     }
 
     @Test
