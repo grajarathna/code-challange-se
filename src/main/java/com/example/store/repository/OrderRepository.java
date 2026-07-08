@@ -11,9 +11,9 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.customer")
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.customer LEFT JOIN FETCH o.products")
     List<Order> findAllWithCustomer();
 
-    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.customer WHERE o.id = :id")
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.customer LEFT JOIN FETCH o.products WHERE o.id = :id")
     Optional<Order> findByIdWithCustomer(@Param("id") Long id);
 }
