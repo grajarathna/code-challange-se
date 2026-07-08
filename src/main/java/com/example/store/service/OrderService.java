@@ -134,8 +134,12 @@ public class OrderService {
 
         List<Product> products = productRepository.findAllById(request.getProductIds());
         if (products.size() != request.getProductIds().size()) {
-            log.warn("Some product IDs not found in request: {}", request.getProductIds());
-            throw new ResourceNotFoundException("Product", -1L);
+            List<Long> foundIds = products.stream().map(Product::getId).toList();
+            List<Long> missingIds = request.getProductIds().stream()
+                    .filter(id -> !foundIds.contains(id))
+                    .toList();
+            log.warn("Product IDs not found: {}", missingIds);
+            throw new ResourceNotFoundException("Product", missingIds.get(0));
         }
 
         Order order = orderMapper.createOrderRequestToOrder(request);
