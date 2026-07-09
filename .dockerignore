@@ -1,0 +1,10 @@
+.git
+.gradle
+.idea
+.kiro
+build/classes
+build/generated
+build/tmp
+build/reports
+node_modules
+*.md
