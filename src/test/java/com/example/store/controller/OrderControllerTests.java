@@ -1,5 +1,6 @@
 package com.example.store.controller;
 
+import com.example.store.dto.CheckoutRequest;
 import com.example.store.dto.CreateOrderRequest;
 import com.example.store.dto.OrderCustomerDTO;
 import com.example.store.dto.OrderResponse;
@@ -174,5 +175,55 @@ class OrderControllerTests {
         when(orderService.getOrderById(999L)).thenThrow(new ResourceNotFoundException("Order", 999L));
 
         mockMvc.perform(get("/api/v1/order/999")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testCheckout_NewCustomer() throws Exception {
+        CheckoutRequest checkoutRequest = new CheckoutRequest();
+        checkoutRequest.setDescription("Checkout Order");
+        checkoutRequest.setProductIds(List.of(1L, 2L));
+        CheckoutRequest.CustomerInfo customerInfo = new CheckoutRequest.CustomerInfo();
+        customerInfo.setName("Jane Doe");
+        customerInfo.setEmail("jane@example.com");
+        checkoutRequest.setCustomer(customerInfo);
+
+        when(orderService.checkout(any(CheckoutRequest.class))).thenReturn(orderResponse);
+
+        mockMvc.perform(post("/api/v1/order/checkout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(checkoutRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.description").value("Test Order"))
+                .andExpect(jsonPath("$.customer.name").value("John Doe"));
+    }
+
+    @Test
+    void testCheckout_ValidationFails_MissingCustomer() throws Exception {
+        CheckoutRequest invalidRequest = new CheckoutRequest();
+
+        mockMvc.perform(post("/api/v1/order/checkout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testCheckout_ProductNotFound() throws Exception {
+        CheckoutRequest checkoutRequest = new CheckoutRequest();
+        checkoutRequest.setDescription("Checkout Order");
+        checkoutRequest.setProductIds(List.of(1L, 9999L));
+        CheckoutRequest.CustomerInfo customerInfo = new CheckoutRequest.CustomerInfo();
+        customerInfo.setName("Jane Doe");
+        customerInfo.setEmail("jane@example.com");
+        checkoutRequest.setCustomer(customerInfo);
+
+        when(orderService.checkout(any(CheckoutRequest.class)))
+                .thenThrow(new ResourceNotFoundException("Product", 9999L));
+
+        mockMvc.perform(post("/api/v1/order/checkout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(checkoutRequest)))
+                .andExpect(status().isNotFound());
     }
 }

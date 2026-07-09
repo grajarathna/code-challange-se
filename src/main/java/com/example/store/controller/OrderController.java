@@ -1,5 +1,6 @@
 package com.example.store.controller;
 
+import com.example.store.dto.CheckoutRequest;
 import com.example.store.dto.CreateOrderRequest;
 import com.example.store.dto.OrderResponse;
 import com.example.store.dto.PaginatedOrderResponse;
@@ -35,5 +36,11 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     public OrderResponse createOrder(@Valid @RequestBody CreateOrderRequest request) {
         return orderService.createOrder(request);
+    }
+
+    @PostMapping("/checkout")
+    @ResponseStatus(HttpStatus.CREATED)
+    public OrderResponse checkout(@Valid @RequestBody CheckoutRequest request) {
+        return orderService.checkout(request);
     }
 }

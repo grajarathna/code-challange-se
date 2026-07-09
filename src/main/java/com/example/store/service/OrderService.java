@@ -1,5 +1,6 @@
 package com.example.store.service;
 
+import com.example.store.dto.CheckoutRequest;
 import com.example.store.dto.CreateOrderRequest;
 import com.example.store.dto.OrderResponse;
 import com.example.store.dto.PaginatedOrderResponse;
@@ -170,5 +171,53 @@ public class OrderService {
                     log.warn("Order not found with id: {}", orderId);
                     return new ResourceNotFoundException("Order", orderId);
                 }));
+    }
+
+    /**
+     * Performs a checkout operation: resolves customer by email (creates if not found), validates products, and creates
+     * an order in a single transaction.
+     *
+     * @param request the checkout request containing order description, product IDs, and inline customer data
+     * @return the created order with generated ID, associated customer, and products
+     * @throws ResourceNotFoundException if any specified product does not exist
+     */
+    @Transactional
+    @CacheEvict(cacheNames = "products", allEntries = true)
+    public OrderResponse checkout(CheckoutRequest request) {
+        log.info("Processing checkout for customer email: {}", request.getCustomer().getEmail());
+
+        // Step 1: Resolve customer by email (find or create)
+        Customer customer = customerRepository.findByEmail(request.getCustomer().getEmail())
+                .orElseGet(() -> {
+                    Customer newCustomer = new Customer();
+                    newCustomer.setName(request.getCustomer().getName());
+                    newCustomer.setEmail(request.getCustomer().getEmail());
+                    return customerRepository.save(newCustomer);
+                });
+
+        // Step 2: Validate products (same as createOrder)
+        List<Product> products = productRepository.findAllById(request.getProductIds());
+        if (products.size() != request.getProductIds().size()) {
+            List<Long> foundIds = products.stream().map(Product::getId).toList();
+            List<Long> missingIds = request.getProductIds().stream()
+                    .filter(id -> !foundIds.contains(id))
+                    .toList();
+            log.warn("Product IDs not found during checkout: {}", missingIds);
+            throw new ResourceNotFoundException("Product", missingIds.get(0));
+        }
+
+        // Step 3: Create and save order
+        Order order = new Order();
+        order.setDescription(request.getDescription());
+        order.setCustomer(customer);
+        order.setProducts(products);
+        OrderResponse response = orderMapper.orderToOrderResponse(orderRepository.save(order));
+
+        // Step 4: Targeted cache eviction
+        request.getProductIds()
+                .forEach(productId -> cacheManager.getCache("productById").evict(productId));
+
+        log.info("Checkout completed: order id={} for customer: {}", response.getId(), customer.getName());
+        return response;
     }
 }

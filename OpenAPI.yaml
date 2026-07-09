@@ -88,6 +88,29 @@ paths:
           description: Order not found
       operationId: getOrderById
       description: Get a specific order by its ID
+  /api/v1/order/checkout:
+    post:
+      summary: Checkout Order
+      tags:
+        - Order
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: Invalid input — validation failed
+        '404':
+          description: Product not found
+      operationId: checkoutOrder
+      description: Create an order with inline customer data. Resolves customer by email (creates if not found).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequest'
   /api/v1/customer:
     get:
       summary: Get Customers
@@ -293,6 +316,37 @@ components:
       properties:
         description:
           type: string
+    CheckoutRequest:
+      title: CheckoutRequest
+      type: object
+      required:
+        - description
+        - productIds
+        - customer
+      properties:
+        description:
+          type: string
+          maxLength: 255
+        productIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          minItems: 1
+          description: List of product IDs to include in the order
+        customer:
+          type: object
+          required:
+            - name
+            - email
+          properties:
+            name:
+              type: string
+              maxLength: 255
+            email:
+              type: string
+              format: email
+              maxLength: 255
     PaginatedOrderResponse:
       title: PaginatedOrderResponse
       type: object
