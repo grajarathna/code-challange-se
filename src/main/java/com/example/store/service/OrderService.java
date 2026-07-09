@@ -184,10 +184,13 @@ public class OrderService {
     @Transactional
     @CacheEvict(cacheNames = "products", allEntries = true)
     public OrderResponse checkout(CheckoutRequest request) {
-        log.info("Processing checkout for customer email: {}", request.getCustomer().getEmail());
+        log.info(
+                "Processing checkout for customer email: {}",
+                request.getCustomer().getEmail());
 
         // Step 1: Resolve customer by email (find or create)
-        Customer customer = customerRepository.findByEmail(request.getCustomer().getEmail())
+        Customer customer = customerRepository
+                .findByEmail(request.getCustomer().getEmail())
                 .orElseGet(() -> {
                     Customer newCustomer = new Customer();
                     newCustomer.setName(request.getCustomer().getName());

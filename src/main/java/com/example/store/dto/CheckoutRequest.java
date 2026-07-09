@@ -17,8 +17,7 @@ public class CheckoutRequest {
     @NotEmpty(message = "At least one product ID is required")
     private List<@NotNull(message = "Product ID cannot be null") Long> productIds;
 
-    @NotNull(message = "Customer information is required")
-    @Valid
+    @NotNull(message = "Customer information is required") @Valid
     private CustomerInfo customer;
 
     @Data
