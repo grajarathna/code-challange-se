@@ -78,7 +78,9 @@ jobs:
   docker-publish:
     needs: [build-and-test, dependency-check]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: |
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      (needs.dependency-check.result == 'success' || needs.dependency-check.result == 'skipped')
     permissions:
       contents: read
       packages: write
