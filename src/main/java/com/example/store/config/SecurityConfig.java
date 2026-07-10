@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/health/**")
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/**")
                         .permitAll()
                         .requestMatchers("/api/**")
                         .authenticated()
