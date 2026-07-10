@@ -13,3 +13,9 @@ spring:
         default_batch_fetch_size: 10
   liquibase:
     enabled: false
+
+app:
+  security:
+    api-key: test-secret-key
+    cors:
+      origin: http://localhost:3000

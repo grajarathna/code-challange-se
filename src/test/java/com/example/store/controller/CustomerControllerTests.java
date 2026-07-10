@@ -2,12 +2,14 @@ package com.example.store.controller;
 
 import com.example.store.dto.CreateCustomerRequest;
 import com.example.store.dto.CustomerResponse;
+import com.example.store.service.ApiKeyService;
 import com.example.store.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CustomerController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class CustomerControllerTests {
 
     @Autowired
@@ -31,6 +34,9 @@ class CustomerControllerTests {
 
     @MockitoBean
     private CustomerService customerService;
+
+    @MockitoBean // Required for Spring context — ApiKeyAuthFilter depends on it (filters disabled via addFilters=false)
+    private ApiKeyService apiKeyService;
 
     private CustomerResponse customerResponse;
     private CreateCustomerRequest createRequest;

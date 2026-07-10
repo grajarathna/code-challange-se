@@ -6,12 +6,14 @@ import com.example.store.dto.OrderCustomerDTO;
 import com.example.store.dto.OrderResponse;
 import com.example.store.dto.PaginatedOrderResponse;
 import com.example.store.exception.ResourceNotFoundException;
+import com.example.store.service.ApiKeyService;
 import com.example.store.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -28,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class OrderControllerTests {
 
     @Autowired
@@ -38,6 +41,9 @@ class OrderControllerTests {
 
     @MockitoBean
     private OrderService orderService;
+
+    @MockitoBean // Required for Spring context — ApiKeyAuthFilter depends on it (filters disabled via addFilters=false)
+    private ApiKeyService apiKeyService;
 
     private OrderResponse orderResponse;
     private CreateOrderRequest createRequest;
