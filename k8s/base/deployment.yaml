@@ -17,10 +17,21 @@ spec:
       labels:
         app: store
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: store
           # For local dev: docker build -t store:latest . && use image: store:latest
           image: ghcr.io/gayan-rajarathna/store-main:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           ports:
             - containerPort: 8080
           envFrom:
@@ -54,3 +65,9 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 20
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
