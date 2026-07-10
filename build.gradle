@@ -55,6 +55,14 @@ dependencies {
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
     testRuntimeOnly 'com.h2database:h2'
 
+    // Testcontainers dependencies
+    testImplementation platform('org.testcontainers:testcontainers-bom:1.20.4')
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testRuntimeOnly 'org.postgresql:postgresql'
+
 
 
 }
@@ -62,6 +70,13 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
     finalizedBy tasks.jacocoTestReport
+
+    // Docker 29+ requires API version >= 1.44; Testcontainers 1.20.4 defaults to 1.32
+    // Docker Desktop on macOS uses ~/.docker/run/docker.sock (not /var/run/docker.sock)
+    def dockerSocket = System.getenv('DOCKER_HOST') ?: "unix://${System.getProperty('user.home')}/.docker/run/docker.sock"
+    environment 'DOCKER_HOST', dockerSocket
+    environment 'TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE', '/var/run/docker.sock'
+    systemProperty 'api.version', '1.44'
 }
 
 tasks.jacocoTestReport {
