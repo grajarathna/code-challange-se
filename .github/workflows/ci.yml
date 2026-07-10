@@ -28,18 +28,11 @@ jobs:
       - name: Check code formatting
         run: ./gradlew spotlessCheck
 
-      - name: Build and run tests
-        run: ./gradlew build
+      - name: Build (compile + assemble JAR)
+        run: ./gradlew assemble
 
-      - name: Run OWASP Dependency-Check
-        run: ./gradlew dependencyCheckAnalyze
-
-      - name: Upload OWASP Dependency-Check report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-check-report
-          path: build/reports/dependency-check-report.html
+      - name: Run tests
+        run: ./gradlew test
 
       - name: Upload test results
         if: always()
@@ -55,8 +48,32 @@ jobs:
           name: coverage-report
           path: build/reports/jacoco/test/html/
 
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run OWASP Dependency-Check
+        run: ./gradlew dependencyCheckAnalyze
+
+      - name: Upload OWASP Dependency-Check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: build/reports/dependency-check-report.html
+
   docker-publish:
-    needs: build-and-test
+    needs: [build-and-test, dependency-check]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
