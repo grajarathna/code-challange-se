@@ -21,6 +21,8 @@ public class Customer {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // No cascade — orders are managed independently via OrderService.
+    // Prevents accidental cascade-delete of order history if a customer is removed.
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
 }
