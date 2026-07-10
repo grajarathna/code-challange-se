@@ -50,6 +50,7 @@ jobs:
 
   dependency-check:
     runs-on: ubuntu-latest
+    if: vars.SKIP_DEPENDENCY_CHECK != 'true'
     steps:
       - uses: actions/checkout@v4
 
