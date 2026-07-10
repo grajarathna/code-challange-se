@@ -208,6 +208,12 @@ paths:
       operationId: getProductById
       description: Get a specific product by its ID with associated order IDs
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key provided by the platform team. Contact the administrator to obtain one.
   schemas:
     Order:
       title: Order
@@ -381,3 +387,5 @@ tags:
     description: Order management operations
   - name: Product
     description: Product operations
+security:
+  - ApiKeyAuth: []
