@@ -79,7 +79,9 @@ jobs:
     needs: [build-and-test, dependency-check]
     runs-on: ubuntu-latest
     if: |
+      always() &&
       github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      needs.build-and-test.result == 'success' &&
       (needs.dependency-check.result == 'success' || needs.dependency-check.result == 'skipped')
     permissions:
       contents: read
@@ -155,3 +157,11 @@ jobs:
         with:
           name: trivy-scan-results
           path: trivy-results.txt
+
+  deploy:
+    needs: [docker-publish, container-scan]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to Render
+        run: curl -s -o /dev/null -w "%{http_code}" "${{ secrets.RENDER_DEPLOY_HOOK }}"
