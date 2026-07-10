@@ -1,8 +1,17 @@
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/store}
     username: ${SPRING_DATASOURCE_USERNAME:admin}
     password: ${SPRING_DATASOURCE_PASSWORD:admin}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      leak-detection-threshold: 60000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: StoreHikariPool
   jpa:
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
     hibernate:
